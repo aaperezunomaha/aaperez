@@ -3,7 +3,7 @@ import random
 
 app = Flask(__name__)
 
-# Game state
+#STARTING 
 state = {
     "tiles": {},  
     "turn": 0,  
@@ -12,7 +12,7 @@ state = {
     "answer": None
 }
 
-# Riddles and answers
+# ALL RIDDLES ANDWERSS
 riddles = [
     ("What has keys but can't open locks?", "keyboard"),
     ("What runs but never walks?", "water"),
