@@ -2,59 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexagon Tile Game</title>
+    <title>Hexagon Riddle Game</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background: #f4f4f4;
+            padding: 20px;
         }
-        #board {
-            display: grid;
-            grid-template-columns: repeat(10, 60px);
-            grid-template-rows: repeat(10, 52px);
-            gap: 2px;
+        .riddle-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .hex {
-            width: 60px;
-            height: 52px;
-            background-color: lightgray;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            transition: background-color 0.2s;
+        .info {
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-<div id="board">
-    <!-- Hexagonal tiles will be added here on clicks -->
+<div class="riddle-box">
+    <h2>Riddle Game</h2>
+    <p class="info"><strong>{{ current_player }}'s Turn</strong></p>
+    <p><strong>Riddle:</strong> {{ riddle }}</p>
+    <input type="text" id="answer" placeholder="Type your answer here..." />
+    <button onclick="submitAnswer()">Submit</button>
+    <p id="message"></p>
+    <p><strong>Positions:</strong> Player 1: {{ positions[0] }}, Player 2: {{ positions[1] }}</p>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Create an empty board of hex tiles
-        for (let i = 0; i < 100; i++) {
-            const hexTile = $('<div class="hex"></div>');
-            hexTile.data("clicked", false);  // Track if a tile has been clicked
-            $('#board').append(hexTile);
-        }
-
-        // Add color to hex tiles on click
-        $('#board').on('click', '.hex', function() {
-            if (!$(this).data("clicked")) {  // Only allow one click per tile
-                $.getJSON('/add_tile', function(data) {
-                    $(this).css('background-color', data.color);
-                    $(this).data("clicked", true);  // Mark as clicked
-                }.bind(this));
-            }
+    function submitAnswer() {
+        const answer = document.getElementById("answer").value;
+        fetch("/submit_answer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ answer })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector(".info").innerHTML = `<strong>${data.current_player}'s Turn</strong>`;
+            document.querySelector("p strong + br + br")?.remove(); // optional cleanup
+            document.querySelector("p:nth-of-type(2)").innerHTML = `<strong>Riddle:</strong> ${data.riddle}`;
+            document.getElementById("message").innerText = data.message;
+            document.querySelector("p:nth-of-type(4)").innerHTML = `<strong>Positions:</strong> Player 1: ${data.positions[0]}, Player 2: ${data.positions[1]}`;
+            document.getElementById("answer").value = "";
         });
-    });
+    }
 </script>
 
 </body>
